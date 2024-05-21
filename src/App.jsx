@@ -19,7 +19,7 @@ function App() {
         <Route path="/login" element={<Login />}></Route>
         <Route path="/register" element={<Register />}></Route>
         <Route path="/profilePhoto" element={<ProfilePhoto />}></Route>
-        <Route path="/home" element={<Home />}>
+        <Route path="/" element={<Home />}>
           <Route path="explore" element={<Explore />}></Route>
           <Route path="following" element={<Following />}></Route>
           <Route path="mytweets" element={<MyTweets />}></Route>

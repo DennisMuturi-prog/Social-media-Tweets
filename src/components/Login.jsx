@@ -40,7 +40,7 @@ const Login = () => {
     console.log(data);
     signInWithEmailAndPassword(auth,email,password).then((result)=>{
       console.log(result);
-      navigate('/home');
+      navigate('/home/explore');
     }).catch((error)=>{
       setErrorMessage(error.message);
       setLoading(false);
@@ -49,7 +49,7 @@ const Login = () => {
   const signInWithGoogle=()=>{
     signInWithPopup(auth,provider).then((result)=>{
       console.log(result);
-      navigate('/home');
+      navigate('/home/explore');
     }).catch((error)=>{
       setErrorMessage(error.message);
     })

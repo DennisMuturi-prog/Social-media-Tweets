@@ -1,14 +1,17 @@
 import { CircleCheck } from "lucide-react";
+
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-export function AlertProfilePhoto() {
+const AlertUsername = () => {
   return (
     <Alert>
       <CircleCheck className="h-4 w-4" />
-      <AlertTitle>Upload successful!</AlertTitle>
+      <AlertTitle>Username updated!</AlertTitle>
       <AlertDescription>
-        Your profile photo has been added successfullly
+        successfully updated your username
       </AlertDescription>
     </Alert>
   );
-}
+};
+
+export default AlertUsername;

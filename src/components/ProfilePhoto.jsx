@@ -12,13 +12,13 @@ import { getDownloadURL, ref, uploadString } from "firebase/storage";
 import { auth, storage } from "@/config/firebase.js";
 import { AlertDestructive } from "./AlertDestructive.jsx";
 import { AlertProfilePhoto } from "./AlertProfilePhoto.jsx";
-import { addUserDetails } from "./addUserDetails.js";
+import { addUserDetails, updateUserDetails } from "./addUserDetails.js";
 import Spinner from "./Spinner.jsx";
 
 const MIN_DIMENSION = 150;
 const ASPECT_RATIO = 1;
 
-const ProfilePhoto = () => {
+const ProfilePhoto = ({destination,userExists}) => {
   const imgRef = useRef(null);
   const previousCanvasRef = useRef(null);
   const [imgSrc, setImgSrc] = useState("");
@@ -27,6 +27,7 @@ const ProfilePhoto = () => {
   const [crop, setCrop] = useState();
   const [showUploadBtn, setShowUploadBtn] = useState(false);
   const [loading,setLoading]=useState(false);
+  const [uploadText,setUploadText]=useState('Upload Pic')
   const navigate = useNavigate();
   const location = useLocation();
   const onSelectFile = (e) => {
@@ -61,16 +62,16 @@ const ProfilePhoto = () => {
         <label>
           <span>Choose Profile Pic</span>
           <input type="file" accept="image/*" onChange={onSelectFile} />
-          <span
+          {!userExists&&<span
             onClick={() => {
-              navigate("/users", {
+              navigate(destination, {
                 state: { username: location.state.username },
               });
             }}
             className={styles.skipBtn}
           >
             Skip
-          </span>
+          </span>}
         </label>
       </div>
       {imgSrc && (
@@ -123,10 +124,25 @@ const ProfilePhoto = () => {
                       setSuccessUpload(true);
                       console.log(snapshot);
                       getDownloadURL(snapshot.ref).then((url)=>{
-                        addUserDetails(url);
-                      })
+                        if(!userExists){
+                          addUserDetails(url).then(()=>{
+                            setLoading(false);
+                            navigate(destination);
 
-                      navigate("/username");
+                          }).catch((error)=>{
+                            setErrorMessage(`failed to add profile photo.${error.message}`)
+                          });
+                        }
+                        else{
+                          updateUserDetails(url).then(()=>{
+                            setLoading(false);
+                            setUploadText('upload success!')
+                          }).catch((error)=>{
+                            setErrorMessage(`failed to update profile photo ${error.message}`)
+                          });
+                        }
+                        
+                      })
                     })
                     .catch((error) => {
                       console.log(error);
@@ -136,7 +152,7 @@ const ProfilePhoto = () => {
                 }}
                 disabled={loading}
               >
-                {loading?'uploading':'Upload profile pic'}
+                {loading?'uploading...':uploadText}
               </button>
             )}
             {errorMessage && <AlertDestructive errorMessage={errorMessage} />}

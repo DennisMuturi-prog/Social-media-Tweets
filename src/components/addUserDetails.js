@@ -1,5 +1,5 @@
 import { auth ,db} from "@/config/firebase";
-import { addDoc,collection } from "firebase/firestore";
+import { addDoc,collection, doc, getDocFromServer, getDocs, query, updateDoc, where } from "firebase/firestore";
 export const addUserDetails = async (profilepicUrl) => {
     try {
       const docRef = await addDoc(collection(db, "users"), {
@@ -12,3 +12,13 @@ export const addUserDetails = async (profilepicUrl) => {
       console.log(error);
     }
   };
+  export const updateUserDetails=async(imageUrl)=>{
+    const usersRef=collection(db,'users');
+    const q=query(usersRef,where('userId','==',auth.currentUser.uid));
+    const querySnapshot=await getDocs(q);
+    const idDoc=querySnapshot.docs[0].id;
+    const docRef=doc(db,'users',idDoc);
+    await updateDoc(docRef,{
+      profilePicUrl:imageUrl
+    })
+  }

@@ -11,6 +11,7 @@ import MyTweets from './components/MyTweets';
 import Profile from './components/Profile';
 import { CreateTweet } from './components/CreateTweet';
 import MutwitterLogo from './components/MutwitterLogo';
+import FollowPeople from './components/FollowPeople';
 
 function App() {
 
@@ -20,15 +21,16 @@ function App() {
         <Route path="/" element={<MutwitterLogo />}></Route>
         <Route path="/login" element={<Login />}></Route>
         <Route path="/register" element={<Register />}></Route>
-        <Route path="/profilePhoto" element={<ProfilePhoto />}></Route>
+        <Route path="/profilePhoto" element={<ProfilePhoto destination='/username'  userExists={false}/>}></Route>
         <Route path="/home" element={<Home />}>
           <Route path="explore" element={<Explore />}></Route>
           <Route path="following" element={<Following />}></Route>
+          <Route path="people" element={<FollowPeople />}></Route>
           <Route path="mytweets" element={<MyTweets />}></Route>
           <Route path="profile" element={<Profile />}></Route>
           <Route path="createTweet" element={<CreateTweet />}></Route>
         </Route>
-        <Route path="/username" element={<UsernameSetter />}></Route>
+        <Route path="/username" element={<UsernameSetter destination='/home/explore' />}></Route>
       </Routes>
     </>
   );

@@ -1,4 +1,4 @@
-import { collection, where, query, getDocs, onSnapshot } from "firebase/firestore";
+import { collection, where, query, onSnapshot } from "firebase/firestore";
 import { db, auth } from "@/config/firebase";
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -8,6 +8,7 @@ import { Button } from "./ui/button";
 import ChangeUsername from "./ChangeUsername";
 import { onAuthStateChanged } from "firebase/auth";
 import ChangeProfilePic from "./ChangeProfilePic";
+import { Link } from "react-router-dom";
 
 const Profile = () => {
   const [userDetails, setUserDetails] = useState({});
@@ -42,18 +43,18 @@ const Profile = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <span className="font-medium mr-2 text-xl">
-            {userDetails.followersCount} Followers
-          </span>
-          <span className="font-medium text-xl">
-            {userDetails.followingCount} Following
-          </span>
+          <Button variant="link" asChild className='text-lg'>
+            <Link to='/home/followersAndFollowing' state={{isFollowers:true}}>{userDetails.followersCount} Followers</Link>
+          </Button>
+          <Button variant="link" asChild className='text-lg'>
+            <Link to='/home/followersAndFollowing' state={{isFollowers:false}}>{userDetails.followingCount} Following</Link>
+          </Button>
         </CardContent>
       </Card>
       <h1 className="font-medium text-lg text-center">Settings</h1>
       <div className="flex flex-col gap-2 justify-center items-center">
         <ChangeUsername />
-        <ChangeProfilePic/>
+        <ChangeProfilePic />
         <Button>Change Password</Button>
         <Button>Log out</Button>
       </div>

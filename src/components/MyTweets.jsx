@@ -4,14 +4,15 @@ import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import Tweet from "./Tweet";
 import { AlertDestructive } from "./AlertDestructive";
-const MyTweets = () => {
+import  {CreateTweet}  from "./CreateTweet";
+const MyTweets = ({userId}) => {
     const [tweets,setTweets]=useState([]);
     const [errorMessage,setErrorMessage]=useState('');
      const getTweets = async () => {
        const tweetsRef = collection(db, "tweets");
        const q = query(
          tweetsRef,
-         where("WriterId", "==", auth.currentUser.uid)
+         where("WriterId", "==", userId?userId:auth.currentUser.uid)
        );
        const unsub=onSnapshot(q,(querySnapshot)=>{
         const tweetsData = querySnapshot.docs.map((doc) => ({
@@ -26,8 +27,7 @@ const MyTweets = () => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
           if (currentUser) {
             getTweets()
-              .then((data) => {
-                console.log(data);
+              .then(() => {
               })
               .catch((error) => {
                 setErrorMessage(error.message);
@@ -37,13 +37,16 @@ const MyTweets = () => {
         return () => unsubscribe();
 
      },[])
+     console.log(tweets);
   return (
     <>
     {errorMessage&&<AlertDestructive errorMessage={errorMessage}/>}
       <div>
+        {tweets.length==0&&<h1 className="text-center font-medium text-lg">You have no tweets...</h1>}
         {tweets.map((tweet, id) => (
-          <Tweet key={id} tweetDetails={tweet} ismyTweet={true} setErrorMessage={setErrorMessage} />
+          <Tweet key={id} tweetDetails={tweet} ismyTweet={userId?false:true} setErrorMessage={setErrorMessage} />
         ))}
+        {!userId&&<CreateTweet/>}
       </div>
     </>
   );

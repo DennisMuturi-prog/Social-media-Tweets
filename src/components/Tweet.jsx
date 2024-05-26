@@ -15,7 +15,8 @@ import { Eye, Heart } from "lucide-react";
 import { Repeat2 } from "lucide-react";
 import { ThumbsDown } from "lucide-react";
 import { doc,updateDoc} from "firebase/firestore";
-
+import { Button } from "./ui/button";
+import { Link } from "react-router-dom";
 
 const Tweet = ({tweetDetails,ismyTweet,setErrorMessage}) => {
     const [imageUrl,setImageUrl]=useState('');
@@ -190,7 +191,12 @@ const Tweet = ({tweetDetails,ismyTweet,setErrorMessage}) => {
                 <FaUserCircle />
               </AvatarFallback>
             </Avatar>
-            <span>@{ismyTweet ? "me" : username}</span>
+            @
+            <Button variant="link" asChild className='px-0 text-lg'>
+              <Link to="/home/user" state={{userId:tweetDetails.WriterId}}>
+                {ismyTweet ? "me" : username}
+              </Link>
+            </Button>
           </CardTitle>
           <CardDescription></CardDescription>
         </CardHeader>
@@ -201,44 +207,41 @@ const Tweet = ({tweetDetails,ismyTweet,setErrorMessage}) => {
           <span
             className="flex mr-2"
             onClick={() => {
-              if (liked&&!disliked) {
+              if (liked && !disliked) {
                 setLiked(false);
                 decreaseTweetParameters("likes")
-                  .then(() => {
-                  })
+                  .then(() => {})
                   .catch((error) => {
                     const errorMessage = `There was a problem with unliking.Try again later.${error.message}`;
                     setErrorMessage(errorMessage);
                     setLiked(true);
                   });
-              } else if(!liked&&!disliked) {
+              } else if (!liked && !disliked) {
                 setLiked(true);
                 increaseTweetParameters("likes")
-                  .then(() => {
-                  })
+                  .then(() => {})
                   .catch((error) => {
                     const errorMessage = `There was a problem with liking.Try again later.${error.message}`;
                     setErrorMessage(errorMessage);
                     setLiked(false);
                   });
-              }
-              else if(!liked&&disliked){
+              } else if (!liked && disliked) {
                 setDisliked(false);
                 setLiked(true);
-                 increaseTweetParameters("likes")
-                   .then(() => {
-                     decreaseTweetParameters('dislikes').then(()=>{
-                     }).catch((error)=>{
+                increaseTweetParameters("likes")
+                  .then(() => {
+                    decreaseTweetParameters("dislikes")
+                      .then(() => {})
+                      .catch((error) => {
                         console.log(error);
-                     })
-                   })
-                   .catch((error) => {
+                      });
+                  })
+                  .catch((error) => {
                     const errorMessage = `There was a problem with liking.Try again later.${error.message}`;
                     setErrorMessage(errorMessage);
-                     setLiked(false);
-                     setDisliked(true);
-                   });
-
+                    setLiked(false);
+                    setDisliked(true);
+                  });
               }
             }}
           >
@@ -251,35 +254,31 @@ const Tweet = ({tweetDetails,ismyTweet,setErrorMessage}) => {
           <span
             className="flex mr-2"
             onClick={() => {
-              if (disliked&&!liked) {
+              if (disliked && !liked) {
                 setDisliked(false);
                 decreaseTweetParameters("dislikes")
-                  .then(() => {
-                  })
+                  .then(() => {})
                   .catch((error) => {
                     const errorMessage = `There was a problem with undisliking.Try again later.${error.message}`;
                     setErrorMessage(errorMessage);
                     setDisliked(true);
                   });
-              } else if(!disliked&&!liked) {
+              } else if (!disliked && !liked) {
                 setDisliked(true);
                 increaseTweetParameters("dislikes")
-                  .then(() => {
-                  })
+                  .then(() => {})
                   .catch((error) => {
                     const errorMessage = `There was a problem with disliking.Try again later.${error.message}`;
                     setErrorMessage(errorMessage);
                     setDisliked(false);
                   });
-              }
-              else if(!disliked&&liked){
+              } else if (!disliked && liked) {
                 setLiked(false);
                 setDisliked(true);
                 increaseTweetParameters("dislikes")
                   .then(() => {
                     decreaseTweetParameters("likes")
-                      .then(() => {
-                      })
+                      .then(() => {})
                       .catch((error) => {
                         console.log(error);
                       });
@@ -295,7 +294,7 @@ const Tweet = ({tweetDetails,ismyTweet,setErrorMessage}) => {
           >
             <ThumbsDown
               fill={disliked ? "black" : "white"}
-              color={disliked?'blue':'black'}
+              color={disliked ? "blue" : "black"}
             />
             {tweetDetails.Dislikes}
           </span>
@@ -305,8 +304,7 @@ const Tweet = ({tweetDetails,ismyTweet,setErrorMessage}) => {
               if (retweeted) {
                 setRetweeted(false);
                 decreaseTweetParameters("retweets")
-                  .then(() => {
-                  })
+                  .then(() => {})
                   .catch((error) => {
                     const errorMessage = `There was a problem with unretweeting.Try again later.${error.message}`;
                     setErrorMessage(errorMessage);
@@ -315,8 +313,7 @@ const Tweet = ({tweetDetails,ismyTweet,setErrorMessage}) => {
               } else {
                 setRetweeted(true);
                 increaseTweetParameters("retweets")
-                  .then(() => {
-                  })
+                  .then(() => {})
                   .catch((error) => {
                     const errorMessage = `There was a problem with retweeeting.Try again later.${error.message}`;
                     setErrorMessage(errorMessage);

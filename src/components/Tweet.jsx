@@ -17,6 +17,7 @@ import { ThumbsDown } from "lucide-react";
 import { doc,updateDoc} from "firebase/firestore";
 import { Button } from "./ui/button";
 import { Link } from "react-router-dom";
+import { checkDate } from "./Dates";
 
 const Tweet = ({tweetDetails,ismyTweet,setErrorMessage}) => {
     const [imageUrl,setImageUrl]=useState('');
@@ -198,7 +199,7 @@ const Tweet = ({tweetDetails,ismyTweet,setErrorMessage}) => {
               </Link>
             </Button>
           </CardTitle>
-          <CardDescription></CardDescription>
+          <CardDescription>{checkDate(tweetDetails.createdAt)}</CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-lg text-start">{tweetDetails.TweetContent}</p>

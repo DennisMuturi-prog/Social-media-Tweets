@@ -44,6 +44,7 @@ export function CreateTweet() {
         TweetContent: tweet,
         WriterId: userId,
         createdAt: new Date(),
+        parentTweetId:false
       });
       console.log("Document written with ID: ", docRef.id);
       form.reset({tweet:''});

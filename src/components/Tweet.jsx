@@ -16,8 +16,9 @@ import { Repeat2 } from "lucide-react";
 import { ThumbsDown } from "lucide-react";
 import { doc,updateDoc} from "firebase/firestore";
 import { Button } from "./ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { checkDate } from "./Dates";
+import { MessageCircle } from "lucide-react";
 
 const Tweet = ({tweetDetails,ismyTweet,setErrorMessage}) => {
     const [imageUrl,setImageUrl]=useState('');
@@ -28,6 +29,7 @@ const Tweet = ({tweetDetails,ismyTweet,setErrorMessage}) => {
     const [tweetLikeRef,setTweetLikeRef]=useState([]);
     const [tweetDislikeRef, setTweetDislikeRef] = useState([]);
     const [tweetRetweetedRef, setTweetRetweetedRef] = useState([]);
+    const navigate=useNavigate();
 
     const getUserDetails=()=>{
         const usersRef = collection(db, "users");
@@ -182,7 +184,12 @@ const Tweet = ({tweetDetails,ismyTweet,setErrorMessage}) => {
       }
     };
   return (
-    <div className="mb-2">
+    <div
+      className="mb-2"
+      onClick={() => {
+        navigate("/home/thread",{state:{tweetDetails:tweetDetails}});
+      }}
+    >
       <Card className="">
         <CardHeader>
           <CardTitle className="flex items-center">
@@ -193,8 +200,8 @@ const Tweet = ({tweetDetails,ismyTweet,setErrorMessage}) => {
               </AvatarFallback>
             </Avatar>
             @
-            <Button variant="link" asChild className='px-0 text-lg'>
-              <Link to="/home/user" state={{userId:tweetDetails.WriterId}}>
+            <Button variant="link" asChild className="px-0 text-lg">
+              <Link to="/home/user" state={{ userId: tweetDetails.WriterId }}>
                 {ismyTweet ? "me" : username}
               </Link>
             </Button>
@@ -207,7 +214,8 @@ const Tweet = ({tweetDetails,ismyTweet,setErrorMessage}) => {
         <CardFooter>
           <span
             className="flex mr-2"
-            onClick={() => {
+            onClick={(event) => {
+              event.stopPropagation();
               if (liked && !disliked) {
                 setLiked(false);
                 decreaseTweetParameters("likes")
@@ -254,7 +262,8 @@ const Tweet = ({tweetDetails,ismyTweet,setErrorMessage}) => {
           </span>
           <span
             className="flex mr-2"
-            onClick={() => {
+            onClick={(event) => {
+              event.stopPropagation();
               if (disliked && !liked) {
                 setDisliked(false);
                 decreaseTweetParameters("dislikes")
@@ -301,7 +310,8 @@ const Tweet = ({tweetDetails,ismyTweet,setErrorMessage}) => {
           </span>
           <span
             className="flex mr-2"
-            onClick={() => {
+            onClick={(event) => {
+              event.stopPropagation();
               if (retweeted) {
                 setRetweeted(false);
                 decreaseTweetParameters("retweets")
@@ -329,6 +339,9 @@ const Tweet = ({tweetDetails,ismyTweet,setErrorMessage}) => {
           <span className="flex mr-2">
             <Eye />
             {tweetDetails.Impressions}
+          </span>
+          <span className="flex mr-2">
+            <MessageCircle />
           </span>
         </CardFooter>
       </Card>

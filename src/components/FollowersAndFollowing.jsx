@@ -1,14 +1,17 @@
 import { collection,where,query,onSnapshot } from "firebase/firestore";
 import { db,auth } from "@/config/firebase";
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 import Person from "./Person";
+import { Button } from "./ui/button";
+import { ArrowLeft } from "lucide-react";
 
 const FollowersAndFollowing = () => {
   const {state}=useLocation();
   const [usersDetails,setUserDetails]=useState([]);
   const [myUserDetails,setMyUserDetails]=useState({});
+  const navigate=useNavigate();
   console.log(state);
    const getFollowing = () => {
      const followsRef = collection(db, "follows");
@@ -76,14 +79,19 @@ const FollowersAndFollowing = () => {
 
   return (
     <div>
+      <Button variant='outline' onClick={()=>{
+        navigate(-1);
+      }}>
+        <ArrowLeft />
+      </Button>
       {state.isFollowers ? (
         <h1 className="font-bold text-lg">
           {" "}
-          {state.userId ? state.username : "My "}Followers
+          {state.userId ? `${state.username} ` : "My "}Followers
         </h1>
       ) : (
         <h1 className="font-bold text-lg">
-          {state.userId ? state.username : "My "}Following
+          {state.userId ? `${state.username} ` : "My "}Following
         </h1>
       )}
       {usersDetails.map((userDetails, index) => (

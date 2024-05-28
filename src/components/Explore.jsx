@@ -1,4 +1,4 @@
-import { collection,onSnapshot,where,query } from "firebase/firestore";
+import { collection,onSnapshot,where,query, orderBy } from "firebase/firestore";
 import { db,auth } from "@/config/firebase";
 import { useEffect, useState } from "react";
 import Tweet from "./Tweet";
@@ -10,7 +10,7 @@ const Explore = () => {
     const [errorMessage,setErrorMessage]=useState('');
     const getTweets = async () => {
       const tweetsRef = collection(db, "tweets");
-      const q = query(tweetsRef, where("WriterId", "!=", auth.currentUser.uid));
+      const q = query(tweetsRef, where("WriterId", "!=", auth.currentUser.uid),orderBy('createdAt','desc'));
      const unsub = onSnapshot(q, (querySnapshot) => {
        const tweetsData = querySnapshot.docs.map((doc) => ({
          ...doc.data(),

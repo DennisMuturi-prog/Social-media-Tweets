@@ -8,10 +8,12 @@ import { Button } from "./ui/button";
 import ChangeUsername from "./ChangeUsername";
 import { onAuthStateChanged } from "firebase/auth";
 import ChangeProfilePic from "./ChangeProfilePic";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { signOut } from "firebase/auth";
 
 const Profile = () => {
   const [userDetails, setUserDetails] = useState({});
+  const navigate=useNavigate();
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
@@ -28,6 +30,16 @@ const Profile = () => {
     });
     return ()=>unsubscribe();
   }, []);
+  const logOut = () => {
+    signOut(auth)
+      .then(() => {
+        console.log("user signed out");
+        navigate("/login");
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
   return (
     <div>
       <Card>
@@ -56,7 +68,9 @@ const Profile = () => {
         <ChangeUsername />
         <ChangeProfilePic />
         <Button>Change Password</Button>
-        <Button>Log out</Button>
+        <Button onClick={()=>{
+          logOut();
+        }}>Log out</Button>
       </div>
     </div>
   );

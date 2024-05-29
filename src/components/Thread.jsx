@@ -25,6 +25,8 @@ const Thread = () => {
 
     }
     useEffect(()=>{
+        setParentTweet('');
+        setThreadedTweets([]);
         getParentTweet();
         getThreadTweets();
     },[id]);

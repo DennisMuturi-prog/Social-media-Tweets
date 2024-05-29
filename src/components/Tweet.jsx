@@ -42,13 +42,13 @@ const Tweet = ({tweetDetails,ismyTweet,setErrorMessage}) => {
           setImageUrl(userDetails[0].profilePicUrl);
           setUsername(userDetails[0].username);
         });
-
     }
     const setInteractionsCorrect=async ()=>{
         const likesref=collection(db,'likes');
         const q=query(likesref,where('likerId','==',auth.currentUser.uid),where('tweetId','==',tweetDetails.id));
         const querySnapshot=await getDocs(q);
         if(querySnapshot.docs.length>0){
+          console.log(querySnapshot.docs[0].data());
             setTweetLikeRef(querySnapshot.docs[0].ref);
             setLiked(true);
         }
@@ -75,10 +75,12 @@ const Tweet = ({tweetDetails,ismyTweet,setErrorMessage}) => {
           setRetweeted(true);
         }
     }
-    useEffect(()=>{
-        getUserDetails();
-        setInteractionsCorrect();
-    },[]);
+    useEffect(() => {
+     getUserDetails();
+     setInteractionsCorrect();
+      
+    }, [tweetDetails]); 
+
     const addRelationParameter=async(paramererName)=>{
         if (paramererName === "likes") {
           try {
@@ -187,7 +189,7 @@ const Tweet = ({tweetDetails,ismyTweet,setErrorMessage}) => {
     <div
       className="mb-2"
       onClick={() => {
-        navigate("/home/thread",{state:{tweetDetails:tweetDetails}});
+        navigate(`/home/${tweetDetails.id}`);
       }}
     >
       <Card className="">

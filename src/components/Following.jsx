@@ -1,6 +1,6 @@
 import { auth,db } from "@/config/firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import { collection, onSnapshot, query, where } from "firebase/firestore";
+import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import { useEffect, useState } from "react"
 import Tweet from "./Tweet";
 
@@ -13,7 +13,7 @@ const Following = () => {
       const ids=querySnapshot.docs.map((doc)=>(doc.data().followedId));
       console.log(ids);
       const tweetsRef=collection(db,'tweets');
-      const q2=query(tweetsRef,where('WriterId','in',ids))
+      const q2=query(tweetsRef,where('WriterId','in',ids),orderBy('createdAt','desc'))
       onSnapshot(q2,(tweets)=>{
         const tweetsData=tweets.docs.map(doc=>({...doc.data(),id:doc.id}));
         console.log(tweetsData);

@@ -10,7 +10,7 @@ const Explore = () => {
     const [errorMessage,setErrorMessage]=useState('');
     const getTweets = async () => {
       const tweetsRef = collection(db, "tweets");
-      const q = query(tweetsRef, where("WriterId", "!=", auth.currentUser.uid),orderBy('createdAt','desc'));
+      const q = query(tweetsRef, where("WriterId", "!=", auth.currentUser.uid),where('parentTweetId','==',false),orderBy('createdAt','desc'));
      const unsub = onSnapshot(q, (querySnapshot) => {
        const tweetsData = querySnapshot.docs.map((doc) => ({
          ...doc.data(),

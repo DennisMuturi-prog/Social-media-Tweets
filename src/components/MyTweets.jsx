@@ -1,4 +1,4 @@
-import { collection,where,query, onSnapshot} from "firebase/firestore";
+import { collection,where,query, onSnapshot, orderBy} from "firebase/firestore";
 import { db,auth } from "@/config/firebase";
 import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
@@ -12,7 +12,8 @@ const MyTweets = ({userId}) => {
        const tweetsRef = collection(db, "tweets");
        const q = query(
          tweetsRef,
-         where("WriterId", "==", userId?userId:auth.currentUser.uid)
+         where("WriterId", "==", userId?userId:auth.currentUser.uid),
+         orderBy('createdAt','desc')
        );
        const unsub=onSnapshot(q,(querySnapshot)=>{
         const tweetsData = querySnapshot.docs.map((doc) => ({

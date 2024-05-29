@@ -40,7 +40,7 @@ function App() {
             path="followersAndFollowing"
             element={<FollowersAndFollowing />}
           ></Route>
-          <Route path="thread" element={<Thread />}></Route>
+          <Route path=":id" element={<Thread />}></Route>
         </Route>
         <Route
           path="/username"

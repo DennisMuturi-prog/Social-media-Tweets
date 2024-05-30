@@ -20,18 +20,18 @@ const Thread = () => {
         onSnapshot(q,(querySnapshot)=>{
             const threadTweets=querySnapshot.docs.map((doc)=>
             ({...doc.data(),id:doc.id}));
-            setThreadedTweets(threadTweets);
+            setThreadedTweets(threadTweets)
+
         })
 
     }
     useEffect(()=>{
         setParentTweet('');
-        setThreadedTweets([]);
+        setThreadedTweets([])
         getParentTweet();
         getThreadTweets();
     },[id]);
     const getParentTweet=()=>{
-        
         const docRef=doc(db,'tweets',id);
         onSnapshot(docRef,(result)=>{
              const parentTweetDetails = { ...result.data(), id: result.id };

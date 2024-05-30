@@ -79,7 +79,7 @@ const Tweet = ({tweetDetails,ismyTweet,setErrorMessage}) => {
      getUserDetails();
      setInteractionsCorrect();
       
-    }, [tweetDetails]); 
+    }, []); 
 
     const addRelationParameter=async(paramererName)=>{
         if (paramererName === "likes") {

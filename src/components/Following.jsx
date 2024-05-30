@@ -31,8 +31,9 @@ const Following = () => {
     return ()=>unSubscribe()
   },[])
   return (
-    <div>{
-      followingTweets.map((tweet,index)=>(<Tweet key={index} tweetDetails={tweet}/>))}</div>
+    <div>
+      {followingTweets.length==0&&<h1 className="text-lg font-bold text-center">no tweets from the people you follow</h1>}
+      {followingTweets.map((tweet,index)=>(<Tweet key={index} tweetDetails={tweet}/>))}</div>
   )
 }
 

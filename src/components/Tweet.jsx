@@ -21,29 +21,15 @@ import { checkDate } from "./Dates";
 import { MessageCircle } from "lucide-react";
 
 const Tweet = ({tweetDetails,ismyTweet,setErrorMessage}) => {
-    const [imageUrl,setImageUrl]=useState('');
-    const [username,setUsername]=useState('');
-    const [disliked,setDisliked]=useState(false);
-    const [liked, setLiked] = useState(false);
-    const [retweeted, setRetweeted] = useState(false);
-    const [tweetLikeRef,setTweetLikeRef]=useState([]);
-    const [tweetDislikeRef, setTweetDislikeRef] = useState([]);
-    const [tweetRetweetedRef, setTweetRetweetedRef] = useState([]);
+    const [disliked,setDisliked]=useState(tweetDetails.tweetDislikeRef?true:false);
+    const [liked, setLiked] = useState(tweetDetails.tweetLikeRef?true:false);
+    const [retweeted, setRetweeted] = useState(tweetDetails.tweetRetweetRef?true:false);
+    const [tweetLikeRef,setTweetLikeRef]=useState(tweetDetails.tweetLikeRef);
+    const [tweetDislikeRef, setTweetDislikeRef] = useState(tweetDetails.tweetDislikeRef);
+    const [tweetRetweetedRef, setTweetRetweetedRef] = useState(tweetDetails.tweetRetweetRef);
     const navigate=useNavigate();
 
-    const getUserDetails=()=>{
-        const usersRef = collection(db, "users");
-        const q = query(usersRef, where("userId", "==", tweetDetails.WriterId));
-        getDocs(q).then((querySnapshot) => {
-          const userDetails = querySnapshot.docs.map((doc) => ({
-            ...doc.data(),
-            id: doc.id,
-          }));
-          setImageUrl(userDetails[0].profilePicUrl);
-          setUsername(userDetails[0].username);
-        });
-    }
-    const setInteractionsCorrect=async ()=>{
+    /*const setInteractionsCorrect=async ()=>{
         const likesref=collection(db,'likes');
         const q=query(likesref,where('likerId','==',auth.currentUser.uid),where('tweetId','==',tweetDetails.id));
         const querySnapshot=await getDocs(q);
@@ -76,10 +62,13 @@ const Tweet = ({tweetDetails,ismyTweet,setErrorMessage}) => {
         }
     }
     useEffect(() => {
-     getUserDetails();
      setInteractionsCorrect();
-      
-    }, []); 
+    },[]); */
+    /*useEffect(()=>{
+      setLiked(false);
+      setDisliked(false);
+      setRetweeted(false);
+    },[tweetDetails])*/
 
     const addRelationParameter=async(paramererName)=>{
         if (paramererName === "likes") {
@@ -141,6 +130,7 @@ const Tweet = ({tweetDetails,ismyTweet,setErrorMessage}) => {
     };
     const increaseTweetParameters=async (parameterType)=>{
         if(parameterType==='likes'){
+          console.log(`id to add ${tweetDetails.id}`)
             const userDoc = doc(db, "tweets", tweetDetails.id);
             await updateDoc(userDoc, {
             Likes:tweetDetails.Likes+1,
@@ -196,7 +186,7 @@ const Tweet = ({tweetDetails,ismyTweet,setErrorMessage}) => {
         <CardHeader>
           <CardTitle className="flex items-center">
             <Avatar>
-              <AvatarImage src={imageUrl} />
+              <AvatarImage src={tweetDetails.tweeterImageUrl} />
               <AvatarFallback>
                 <FaUserCircle />
               </AvatarFallback>
@@ -204,7 +194,7 @@ const Tweet = ({tweetDetails,ismyTweet,setErrorMessage}) => {
             @
             <Button variant="link" asChild className="px-0 text-lg">
               <Link to="/home/user" state={{ userId: tweetDetails.WriterId }}>
-                {ismyTweet ? "me" : username}
+                {ismyTweet ? "me" : tweetDetails.tweeterUsername}
               </Link>
             </Button>
           </CardTitle>
@@ -233,6 +223,7 @@ const Tweet = ({tweetDetails,ismyTweet,setErrorMessage}) => {
                   .then(() => {})
                   .catch((error) => {
                     const errorMessage = `There was a problem with liking.Try again later.${error.message}`;
+                    console.error(error);
                     setErrorMessage(errorMessage);
                     setLiked(false);
                   });

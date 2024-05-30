@@ -7,29 +7,17 @@ import { AlertDestructive } from './AlertDestructive';
 import { ReplyTweet } from './ReplyTweet';
 import { Button } from './ui/button';
 import { ArrowLeft } from 'lucide-react';
+import ThreadedTweets from './ThreadedTweets';
 
 const Thread = () => {
     const navigate=useNavigate();
     const {id}=useParams();
     const [errorMessage,setErrorMessage]=useState('');
-    const [threadedTweets,setThreadedTweets]=useState([]);
     const [parentTweet,setParentTweet]=useState('');
-    const getThreadTweets=()=>{
-        setThreadedTweets([]);
-        const q=query(collection(db,'tweets'),where('parentTweetId','==',id),orderBy('createdAt','desc'));
-        onSnapshot(q,(querySnapshot)=>{
-            const threadTweets=querySnapshot.docs.map((doc)=>
-            ({...doc.data(),id:doc.id}));
-            setThreadedTweets(threadTweets)
-
-        })
-
-    }
+   
     useEffect(()=>{
         setParentTweet('');
-        setThreadedTweets([])
         getParentTweet();
-        getThreadTweets();
     },[id]);
     const getParentTweet=()=>{
         const docRef=doc(db,'tweets',id);
@@ -56,14 +44,7 @@ const Thread = () => {
         <Tweet tweetDetails={parentTweet} setErrorMessage={setErrorMessage}  />
       )}
       <ReplyTweet parentTweetId={id} />
-      {threadedTweets.length == 0 && <h1 className='text-lg'>no replies yet...</h1>}
-      {threadedTweets.map((tweet, index) => (
-        <Tweet
-          key={index}
-          tweetDetails={tweet}
-          setErrorMessage={setErrorMessage}
-        />
-      ))}
+      {parentTweet&&<ThreadedTweets parentTweet={parentTweet}/>}
     </div>
   );
 }

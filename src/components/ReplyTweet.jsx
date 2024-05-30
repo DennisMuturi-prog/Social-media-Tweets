@@ -5,30 +5,30 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { auth, db } from "../config/firebase";
-import { collection, addDoc } from "firebase/firestore";
-import { useState } from "react";
+import { collection, addDoc, getDocs, where, query } from "firebase/firestore";
+import { useEffect, useState } from "react";
 import { AlertDestructive } from "./AlertDestructive";
 import { Input } from "./ui/input";
+import { onAuthStateChanged } from "firebase/auth";
 
-const FormSchema = yup.object({
-  tweet: yup
-    .string()
-    .min(10, "tweet  must be at least 10 characters.")
-    .max(160, "tweet must not be longer than 30 characters.")
-    .required(),
-});
 
 export function ReplyTweet({parentTweetId}) {
+    const FormSchema = yup.object({
+      tweet: yup
+        .string()
+        .min(10, "tweet  must be at least 10 characters.")
+        .max(160, "tweet must not be longer than 30 characters.")
+        .required(),
+    });
   const [errorMessage, setErrorMessage] = useState("");
+   const [imageUrl, setImageUrl] = useState("");
+   const [username, setUsername] = useState("");
   const form = useForm({
     resolver: yupResolver(FormSchema),
   });
@@ -46,6 +46,8 @@ export function ReplyTweet({parentTweetId}) {
         WriterId: userId,
         createdAt: new Date(),
         parentTweetId: parentTweetId,
+        tweeterUsername:username,
+        tweeterImageUrl:imageUrl
       });
       console.log("Document written with ID: ", docRef.id);
       form.reset({ tweet: "" });
@@ -53,6 +55,27 @@ export function ReplyTweet({parentTweetId}) {
       setErrorMessage(error.message);
     }
   }
+   const getUserDetails = () => {
+     const usersRef = collection(db, "users");
+     const q = query(usersRef, where("userId", "==", auth.currentUser.uid));
+     getDocs(q).then((querySnapshot) => {
+       const userDetails = querySnapshot.docs.map((doc) => ({
+         ...doc.data(),
+         id: doc.id,
+       }));
+       setImageUrl(userDetails[0].profilePicUrl);
+       setUsername(userDetails[0].username);
+     });
+   };
+   useEffect(() => {
+    const unsub=onAuthStateChanged(auth,(currentUser)=>{
+        if(currentUser){
+             getUserDetails();
+        }
+    })
+    return ()=>unsub();
+    
+   }, []);
 
   return (
     <>

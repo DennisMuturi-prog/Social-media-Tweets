@@ -6,6 +6,7 @@ import Tweet from './Tweet';
 const ThreadedTweets = ({parentTweet}) => {
     const [errorMessage,setErrorMessage]=useState('');
     const [threadedTweets,setThreadedTweets]=useState([]);
+    console.log('thread rendered');
     const getThreadTweets = async () => {
       const q = query(
         collection(db, "tweets"),
@@ -17,7 +18,6 @@ const ThreadedTweets = ({parentTweet}) => {
        (querySnapshot) => {
          querySnapshot.docChanges().forEach((change) => {
            if (change.type === "added") {
-            console.log('added:',change.doc.data())
              setThreadedTweets((currentTweets) => [
                { ...change.doc.data(), id: change.doc.id },
                ...currentTweets

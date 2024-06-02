@@ -2,7 +2,7 @@ import {db } from "@/config/firebase";
 import {
     collection,
   doc,
-  getDoc,
+  orderBy,
   onSnapshot,
   where,
   query
@@ -14,17 +14,43 @@ import { AlertDestructive } from "./AlertDestructive";
 import { ReplyTweet } from "./ReplyTweet";
 import { Button } from "./ui/button";
 import { ArrowLeft } from "lucide-react";
-import ThreadedTweets from "./ThreadedTweets";
 
 const Thread = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [errorMessage, setErrorMessage] = useState("");
-  const [parentTweet, setParentTweet] = useState();
+  const [parentTweet, setParentTweet] = useState('');
+  const [threadedTweets, setThreadedTweets] = useState([]);
+
+  const getThreadTweets = async () => {
+    const q = query(
+      collection(db, "tweets"),
+      where("parentTweetId", "==",id),
+      orderBy("createdAt", "desc")
+    );
+    const unsubTweets = onSnapshot(
+      q,
+      (querySnapshot) => {
+        const tweetsData=querySnapshot.docs.map((doc)=>({...doc.data(),id:doc.id}));
+        setThreadedTweets(tweetsData)  
+      },
+      (error) => {
+        console.error(error);
+        setErrorMessage(error.message);
+      }
+    );
+    return unsubTweets;
+  };
 
   useEffect(() => {
+    setThreadedTweets([])
     getParentTweet().then((unsubParent)=>{
-        return ()=>unsubParent()
+        getThreadTweets().then((unsubTweets)=>{
+             return () =>{
+                unsubParent();
+                unsubTweets()
+             } 
+        })
     });
   }, [id]);
   const getParentTweet = async() => {
@@ -59,7 +85,7 @@ const Thread = () => {
         <Tweet key={parentTweet.id} tweetDetails={parentTweet} setErrorMessage={setErrorMessage} />
       )}
       <ReplyTweet parentTweetId={id} />
-      {parentTweet && <ThreadedTweets parentTweet={parentTweet} />}
+      {parentTweet &&threadedTweets.map((tweet)=>(<Tweet key={tweet.id} tweetDetails={tweet} setErrorMessage={setErrorMessage}/>))}
     </div>
   );
 };

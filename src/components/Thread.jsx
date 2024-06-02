@@ -1,8 +1,11 @@
 import {db } from "@/config/firebase";
 import {
+    collection,
   doc,
   getDoc,
   onSnapshot,
+  where,
+  query
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -12,48 +15,31 @@ import { ReplyTweet } from "./ReplyTweet";
 import { Button } from "./ui/button";
 import { ArrowLeft } from "lucide-react";
 import ThreadedTweets from "./ThreadedTweets";
-import { setInteractionsCorrect } from "./Interactions";
 
 const Thread = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [errorMessage, setErrorMessage] = useState("");
-  const [parentTweet, setParentTweet] = useState("");
+  const [parentTweet, setParentTweet] = useState();
 
   useEffect(() => {
-    getParentTweet();
-  }, []);
-
-  useEffect(() => {
-    getParentTweet();
+    getParentTweet().then((unsubParent)=>{
+        return ()=>unsubParent()
+    });
   }, [id]);
-  const getParentTweet = () => {
+  const getParentTweet = async() => {
     const docRef = doc(db, "tweets", id);
-    getDoc(docRef).then((result) => {
-      setInteractionsCorrect(result.id).then((interactionData)=>{
-         console.log(interactionData);
-         const parentTweetDetails = {
-           ...result.data(),
-           ...interactionData,
-           id: result.id,
-         };
-         console.log(parentTweetDetails)
-         setParentTweet(parentTweetDetails);
-      });
-     
-    });
-    onSnapshot(docRef, (querySnapshot) => {
-         const newState = querySnapshot.data();
-         const changes = {};
-         for (const [key, value] of Object.entries(newState)) {
-           if (parentTweet[key] !== value) {
-             changes[key] = value;
-           }
-         }
-
-         setParentTweet((prevState) => ({ ...prevState, ...changes }));
-
-    });
+    const unsubParent=onSnapshot(
+      docRef,
+      (doc) => {
+        setParentTweet({ ...doc.data(), id: doc.id });
+      },
+      (error) => {
+        console.error(error);
+        setErrorMessage(error.message);
+      }
+    ); 
+    return unsubParent;
   };
   return (
     <div>
@@ -70,7 +56,7 @@ const Thread = () => {
       </div>
       {errorMessage && <AlertDestructive errorMessage={errorMessage} />}
       {parentTweet && (
-        <Tweet tweetDetails={parentTweet} setErrorMessage={setErrorMessage} />
+        <Tweet key={parentTweet.id} tweetDetails={parentTweet} setErrorMessage={setErrorMessage} />
       )}
       <ReplyTweet parentTweetId={id} />
       {parentTweet && <ThreadedTweets parentTweet={parentTweet} />}

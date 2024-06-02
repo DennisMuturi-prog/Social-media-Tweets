@@ -19,22 +19,22 @@ import { Button } from "./ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import { checkDate } from "./Dates";
 import { MessageCircle } from "lucide-react";
+import { onAuthStateChanged } from "firebase/auth";
 
 const Tweet = ({tweetDetails,ismyTweet,setErrorMessage}) => {
-    const [disliked,setDisliked]=useState(tweetDetails.tweetDislikeRef?true:false);
-    const [liked, setLiked] = useState(tweetDetails.tweetLikeRef?true:false);
-    const [retweeted, setRetweeted] = useState(tweetDetails.tweetRetweetRef?true:false);
-    const [tweetLikeRef,setTweetLikeRef]=useState(tweetDetails.tweetLikeRef);
-    const [tweetDislikeRef, setTweetDislikeRef] = useState(tweetDetails.tweetDislikeRef);
-    const [tweetRetweetedRef, setTweetRetweetedRef] = useState(tweetDetails.tweetRetweetRef);
+    const [disliked,setDisliked]=useState(false);
+    const [liked, setLiked] = useState(false);
+    const [retweeted, setRetweeted] = useState(false);
+    const [tweetLikeRef,setTweetLikeRef]=useState([]);
+    const [tweetDislikeRef, setTweetDislikeRef] = useState([]);
+    const [tweetRetweetedRef, setTweetRetweetedRef] = useState([]);
     const navigate=useNavigate();
 
-    /*const setInteractionsCorrect=async ()=>{
+    const setInteractionsCorrect=async ()=>{
         const likesref=collection(db,'likes');
         const q=query(likesref,where('likerId','==',auth.currentUser.uid),where('tweetId','==',tweetDetails.id));
         const querySnapshot=await getDocs(q);
         if(querySnapshot.docs.length>0){
-          console.log(querySnapshot.docs[0].data());
             setTweetLikeRef(querySnapshot.docs[0].ref);
             setLiked(true);
         }
@@ -62,13 +62,16 @@ const Tweet = ({tweetDetails,ismyTweet,setErrorMessage}) => {
         }
     }
     useEffect(() => {
-     setInteractionsCorrect();
-    },[]); */
-    /*useEffect(()=>{
-      setLiked(false);
-      setDisliked(false);
-      setRetweeted(false);
-    },[tweetDetails])*/
+      const unsub=onAuthStateChanged(auth,(currentUser)=>{
+        if(currentUser){
+          setInteractionsCorrect();
+
+        }
+      })
+      return ()=>unsub();
+     
+    },[]); 
+    
 
     const addRelationParameter=async(paramererName)=>{
         if (paramererName === "likes") {
@@ -130,7 +133,6 @@ const Tweet = ({tweetDetails,ismyTweet,setErrorMessage}) => {
     };
     const increaseTweetParameters=async (parameterType)=>{
         if(parameterType==='likes'){
-          console.log(`id to add ${tweetDetails.id}`)
             const userDoc = doc(db, "tweets", tweetDetails.id);
             await updateDoc(userDoc, {
             Likes:tweetDetails.Likes+1,
@@ -215,6 +217,7 @@ const Tweet = ({tweetDetails,ismyTweet,setErrorMessage}) => {
                   .catch((error) => {
                     const errorMessage = `There was a problem with unliking.Try again later.${error.message}`;
                     setErrorMessage(errorMessage);
+                    console.error(error);
                     setLiked(true);
                   });
               } else if (!liked && !disliked) {

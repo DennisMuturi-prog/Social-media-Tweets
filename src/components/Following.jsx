@@ -7,73 +7,81 @@ import { setInteractionsCorrect } from "./Interactions";
 
 const Following = () => {
   const [followingTweets,setFollowingTweets]=useState([]);
+  const [followingIds,setFollowingIds]=useState([]);
   const getFollowing=()=>{
     const followsRef=collection(db,'follows');
     const q=query(followsRef,where('followerId','==',auth.currentUser.uid));
-    onSnapshot(q,(querySnapshot)=>{
-      const ids=querySnapshot.docs.map((doc)=>(doc.data().followedId));
-      getTweets(ids);
-    })
+    getDocs(q).then((querySnapshot) => {
+      const ids = querySnapshot.docs.map((doc) => doc.data().followedId);
+      setFollowingIds(ids);
+      updateFollowingTweets(ids).then((unsubFollowingTweets)=>{
+        return unsubFollowingTweets;
+      });
+    });
   }
-   const getTweets = async (ids) => {
-     const tweetsRef = collection(db, "tweets");
+  const updateFollowing=()=>{
+     const followsRef = collection(db, "follows");
      const q = query(
-       tweetsRef,
-       where("WriterId", "in", ids),
-       orderBy("createdAt", "desc")
+       followsRef,
+       where("followerId", "==", auth.currentUser.uid)
      );
-     const tweetsData = [];
-
-     const querySnapshot = await getDocs(q);
-     const tweetPromises = querySnapshot.docs.map(async (doc) => {
-       const tweetData = doc.data();
-       const interactionData = await setInteractionsCorrect(doc.id);
-       tweetsData.push({ ...tweetData, ...interactionData, id: doc.id });
-     });
-
-     await Promise.all(tweetPromises);
-
-     setFollowingTweets(tweetsData);
-     const q2 = query(
-       tweetsRef,
-       where("WriterId", "in", ids),
-     );
-     onSnapshot(q2, (querySnapshot) => {
+    const unsubFollowing = onSnapshot(q, (querySnapshot) => {
+      querySnapshot.docChanges().forEach((change) => {
+        if (change.type === "added") {
+          setFollowingIds([...followingIds, change.doc.data().followedId]);
+        }
+      });
+    });
+  }
+  const updateFollowingTweets=async (ids)=>{
+    const tweetsRef = collection(db, "tweets");
+    const q = query(
+      tweetsRef,
+      where("WriterId", "in", ids),
+      orderBy("createdAt", "asc")
+    );
+     const unsubFollowingTweets = onSnapshot(q, (querySnapshot) => {
        querySnapshot.docChanges().forEach((change) => {
-         if (change.type === "added" || change.type === "modified") {
+         if (change.type === "added") {
+            setFollowingTweets((currentTweets) => [
+              { ...change.doc.data(), id: change.doc.id },
+              ...currentTweets
+            ]);
+         } else if (change.type === "modified") {
            setFollowingTweets((prevTweets) => {
-             const newTweet = { ...change.doc.data(), id: change.doc.id };
-             // If the tweet already exists in the state, replace it
-             const tweetIndex = prevTweets.findIndex(
-               (tweet) => tweet.id === newTweet.id
+             return prevTweets.map((tweet) =>
+               tweet.id === change.doc.id
+                 ? { ...change.doc.data(), id: change.doc.id }
+                 : tweet
              );
-             if (tweetIndex !== -1) {
-               const updatedTweets = [...prevTweets];
-               updatedTweets[tweetIndex] = newTweet;
-               return updatedTweets;
-             }
-             // If the tweet doesn't exist in the state, add it
-             else {
-               return [newTweet, ...prevTweets];
-             }
            });
          }
        });
      });
-   };
+     return unsubFollowingTweets;
+
+  }
+ 
 
   useEffect(()=>{
     const unSubscribe=onAuthStateChanged(auth,(currentUser)=>{
       if(currentUser){
-        getFollowing();
+        getFollowing().then((unsubFollowingTweets)=>{
+          return ()=>{
+            unsubFollowingTweets();
+            unSubscribe();
+          }
+        });
       }
     })
-    return ()=>unSubscribe()
+    return ()=>{
+      unSubscribe()
+    }
   },[])
   return (
     <div>
       {followingTweets.length==0&&<h1 className="text-lg font-bold text-center">no tweets from the people you follow</h1>}
-      {followingTweets.map((tweet,index)=>(<Tweet key={index} tweetDetails={tweet}/>))}</div>
+      {followingTweets.map((tweet)=>(<Tweet key={tweet.id} tweetDetails={tweet}/>))}</div>
   )
 }
 

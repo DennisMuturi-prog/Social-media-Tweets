@@ -5,66 +5,55 @@ import { onAuthStateChanged } from "firebase/auth";
 import Tweet from "./Tweet";
 import { AlertDestructive } from "./AlertDestructive";
 import  {CreateTweet}  from "./CreateTweet";
-import { setInteractionsCorrect } from "./Interactions";
 const MyTweets = ({userId}) => {
     const [tweets,setTweets]=useState([]);
     const [errorMessage,setErrorMessage]=useState('');
-     const getTweets = async () => {
-       const tweetsRef = collection(db, "tweets");
+     const tweetsRef = collection(db, "tweets");
+    
+
+    const getTweets = async () => {
        const q = query(
          tweetsRef,
-         where("WriterId", "==", userId?userId:auth.currentUser.uid),
-         orderBy('createdAt','desc')
+         where("WriterId", "==", userId ? userId : auth.currentUser.uid),
+         orderBy("createdAt", "asc")
        );
-       const tweetsData = [];
-
-       const querySnapshot = await getDocs(q);
-       const tweetPromises = querySnapshot.docs.map(async (doc) => {
-         const tweetData = doc.data();
-         const interactionData = await setInteractionsCorrect(doc.id);
-         tweetsData.push({ ...tweetData, ...interactionData,id:doc.id});
-       });
-
-       await Promise.all(tweetPromises);
-
-       setTweets(tweetsData);
-        const q2= query(
-          tweetsRef,
-          where("WriterId", "==", userId ? userId : auth.currentUser.uid),
-        );
-       onSnapshot(q2, (querySnapshot) => {
-         querySnapshot.docChanges().forEach((change) => {
-           if (change.type === "added" || change.type === "modified") {
-             setTweets((prevTweets) => {
-               const newTweet = { ...change.doc.data(), id: change.doc.id };
-               // If the tweet already exists in the state, replace it
-               const tweetIndex = prevTweets.findIndex(
-                 (tweet) => tweet.id === newTweet.id
-               );
-               if (tweetIndex !== -1) {
-                 const updatedTweets = [...prevTweets];
-                 updatedTweets[tweetIndex] = newTweet;
-                 return updatedTweets;
-               }
-               // If the tweet doesn't exist in the state, add it
-               else {
-                 return [newTweet, ...prevTweets];
-               }
-             });
-           }
-         });
-       });
-       
-     };
+       const unsubTweets = onSnapshot(
+         q,
+         (querySnapshot) => {
+           querySnapshot.docChanges().forEach((change) => {
+             if (change.type === "added") {
+               setTweets((currentTweets) => [
+                 { ...change.doc.data(), id: change.doc.id },
+                 ...currentTweets,
+               ]);
+             } else if (change.type === "modified") {
+               setTweets((prevTweets) => {
+                 return prevTweets.map((tweet) =>
+                   tweet.id === change.doc.id
+                     ? { ...change.doc.data(), id: change.doc.id }
+                     : tweet
+                 );
+               });
+             }
+           });
+         },
+         (error) => {
+           console.error(error);
+           setErrorMessage(error.message);
+         }
+       );   
+       return unsubTweets;
+    };
      useEffect(()=>{
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
           if (currentUser) {
-            getTweets()
-              .then(() => {
-              })
-              .catch((error) => {
-                setErrorMessage(error.message);
-              });
+             getTweets().then((unsubTweets)=>{
+              return ()=>{
+                unsubTweets();
+                unsubscribe();
+              }
+             })
+             
           }
         });
         return () => unsubscribe();

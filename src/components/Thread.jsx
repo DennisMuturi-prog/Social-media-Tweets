@@ -82,10 +82,24 @@ const Thread = () => {
       </div>
       {errorMessage && <AlertDestructive errorMessage={errorMessage} />}
       {parentTweet && (
-        <Tweet key={parentTweet.id} tweetDetails={parentTweet} setErrorMessage={setErrorMessage} />
+        <Tweet
+          key={parentTweet.id}
+          tweetDetails={parentTweet}
+          setErrorMessage={setErrorMessage}
+        />
       )}
       <ReplyTweet parentTweetId={id} />
-      {parentTweet &&threadedTweets.map((tweet)=>(<Tweet key={tweet.id} tweetDetails={tweet} setErrorMessage={setErrorMessage}/>))}
+      {threadedTweets.length == 0 && (
+        <h1 className="text-lg">no replies yet...</h1>
+      )}
+      {parentTweet &&
+        threadedTweets.map((tweet) => (
+          <Tweet
+            key={tweet.id}
+            tweetDetails={tweet}
+            setErrorMessage={setErrorMessage}
+          />
+        ))}
     </div>
   );
 };

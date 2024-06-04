@@ -26,11 +26,15 @@ const UserProfile = () => {
       if (currentUser) {
         const usersRef = collection(db, "users");
         const q = query(usersRef, where("userId", "==", state.userId));
-        onSnapshot(q, (querySnapshot) => {
+        const unsubUserProfile=onSnapshot(q, (querySnapshot) => {
           const userdetails = querySnapshot.docs.map((doc) => ({
             ...doc.data(),
           }));
           setUserDetails(userdetails[0]);
+          return ()=>{
+            unsubUserProfile();
+            unsubscribe();
+          }
         });
       }
     });

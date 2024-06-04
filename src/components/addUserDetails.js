@@ -1,8 +1,10 @@
 import { auth ,db} from "@/config/firebase";
-import { addDoc,collection, doc, getDocFromServer, getDocs, query, updateDoc, where } from "firebase/firestore";
+import { addDoc,collection, doc, getDocFromServer, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore";
 export const addUserDetails = async (profilepicUrl) => {
     try {
-      const docRef = await addDoc(collection(db, "users"), {
+      const usersRef = collection(db, 'users');
+      const userDoc = doc(usersRef, auth.currentUser.uid); 
+      const docRef = await setDoc(userDoc, {
         followersCount: 0,
         followingCount: 0,
         userId: auth.currentUser.uid,

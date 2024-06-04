@@ -32,6 +32,10 @@ const User = () => {
           }));
           setImageUrl(userDetails[0].profilePicUrl);
           setUsername(userDetails[0].username);
+          return ()=>{
+            unsub();
+            unsubscribe();
+          }
         })
       }
     });

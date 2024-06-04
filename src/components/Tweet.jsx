@@ -29,6 +29,7 @@ const Tweet = ({tweetDetails,ismyTweet,setErrorMessage}) => {
     const [tweetDislikeRef, setTweetDislikeRef] = useState([]);
     const [tweetRetweetedRef, setTweetRetweetedRef] = useState([]);
     const navigate=useNavigate();
+    console.log('tweet rendered')
 
     const setInteractionsCorrect=async ()=>{
         const likesref=collection(db,'likes');

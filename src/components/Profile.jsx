@@ -19,11 +19,15 @@ const Profile = () => {
       if (currentUser) {
         const usersRef = collection(db, "users");
         const q = query(usersRef, where("userId", "==", auth.currentUser.uid));
-        onSnapshot(q,(querySnapshot)=>{
+        const unsubProfileDetails=onSnapshot(q,(querySnapshot)=>{
           const userdetails = querySnapshot.docs.map((doc) => ({
             ...doc.data(),
           }));
           setUserDetails(userdetails[0]);
+          return ()=>{
+            unsubProfileDetails()
+            unsubscribe();
+          }
 
         })
       }
@@ -67,7 +71,8 @@ const Profile = () => {
       <div className="flex flex-col gap-2 justify-center items-center">
         <ChangeUsername />
         <ChangeProfilePic />
-        <Button>Change Password</Button>
+        <Button onClick={()=>{
+        }}>Change Password</Button>
         <Button onClick={()=>{
           logOut();
         }}>Log out</Button>
